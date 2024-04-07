@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Calculateur de Santé Complet</title>
+    <style>
+        body { font-family: Arial, sans-serif; }
+        .results { margin-top: 20px; }
+    </style>
+</head>
+<body>
+
+<h2>Calculateur de Santé Complet</h2>
+<form id="calculatorForm">
+    <label for="age">Âge:</label>
+    <input type="number" id="age" required><br><br>
+    
+    <label for="sex">Sexe:</label>
+    <select id="sex" required>
+        <option value="">Sélectionnez...</option>
+        <option value="male">Homme</option>
+        <option value="female">Femme</option>
+    </select><br><br>
+    
+    <label for="height">Taille (cm):</label>
+    <input type="number" id="height" required><br><br>
+    
+    <label for="weight">Poids (kg):</label>
+    <input type="number" id="weight" required><br><br>
+    
+    <label for="waist">Tour de taille (cm):</label>
+    <input type="number" id="waist" required><br><br>
+    
+    <label for="hip">Tour de hanche (cm):</label>
+    <input type="number" id="hip" required><br><br>
+    
+    <label for="activityLevel">Niveau d'activité:</label>
+    <select id="activityLevel" required>
+        <option value="sedentary">Sédentaire</option>
+        <option value="light">Peu actif</option>
+        <option value="moderate">Modérément actif</option>
+        <option value="active">Actif</option>
+        <option value="veryActive">Très actif</option>
+    </select><br><br>
+    
+    <button type="button" onclick="calculateResults()">Calculer</button>
+</form>
+
+<div id="results" class="results"></div>
+
+<script>
+function calculateResults() {
+    const age = parseInt(document.getElementById('age').value);
+    const sex = document.getElementById('sex').value;
+    const height = parseInt(document.getElementById('height').value);
+    const weight = parseInt(document.getElementById('weight').value);
+    const waist = parseInt(document.getElementById('waist').value);
+    const hip = parseInt(document.getElementById('hip').value);
+    const activityLevel = document.getElementById('activityLevel').value;
+
+    const imc = weight / ((height / 100) ** 2);
+    const imcInterpretation = interpretIMC(imc);
+    document.getElementById('results').innerHTML = `
+        <p>Votre Métabolisme de Base (BMR) : ${calculateBMR(weight, height, age, sex).toFixed(2)} kcal/jour. Votre corps brûle des calories en permanence, même au repos.</p>
+        <p>Votre Indice de Masse Corporelle (IMC) : ${imc.toFixed(2)} - ${imcInterpretation}</p>
+        <p>Votre Poids Idéal (Lorentz) : ${calculateLorentz(height, sex).toFixed(2)} kg. C'est une estimation de votre poids idéal basée sur votre taille.</p>
+        <p>Votre Indice de Masse Grasse (IMG) : ${calculateIMG(imc, age, sex).toFixed(2)}%. ${interpretIMG(calculateIMG(imc, age, sex), sex)}</p>
+        <p>Votre Rapport Taille-Hanche (RTH) : ${calculateRTH(waist, hip).toFixed(2)}. ${interpretRTH(calculateRTH(waist, hip), sex)}</p>
+    `;
+}
+
+function calculateBMR(weight, height, age, sex) {
+    return sex === 'male' ? (10 * weight) + (6.25 * height) - (5 * age) + 5 : (10 * weight) + (6.25 * height) - (5 * age) - 161;
+}
+
+function calculateLorentz(height, sex) {
+    return sex === 'male' ? height - 100 - ((height - 150) / 4) : height - 100 - ((height - 150) / 2.5);
+}
+
+function calculateIMG(imc, age, sex) {
+    const sexFactor = sex === 'male' ? 1 : 0;
+    return (1.20 * imc) + (0.23 * age) - (10.8 * sexFactor) - 5.4;
+}
+
+function calculateRTH(waist, hip) {
+    return waist / hip;
+}
+
+function interpretIMC(imc) {
+    if (imc < 16) return "Anorexie ou dénutrition - un risque élevé pour votre santé.";
+    else if (imc < 18.5) return "Maigreur - un peu plus de gourmandise ne ferait pas de mal.";
+    else if (imc < 25) return "Corpulence normale - vous êtes en bonne santé, continuez comme ça.";
+    else if (imc < 30) return "Surpoids - attention à votre alimentation et à votre activité physique.";
+    else if (imc < 35) return "Obésité modérée (Classe 1) - il est temps de revoir vos habitudes de vie.";
+    else if (imc < 40) return "Obésité élevée (Classe 2) - un suivi médical s'impose pour prévenir les risques de santé.";
+    else return "Obésité morbide ou massive - des mesures immédiates sont nécessaires pour votre santé.";
+}
+
+function interpretIMG(img, sex) {
+    if (sex === 'male') {
+        return img < 15 ? "Trop maigre - attention à une alimentation suffisante." :
+               img <= 20 ? "Pourcentage de graisse corporelle normal - vous êtes bien équilibré." :
+               "Trop de graisse - envisagez de réduire votre pourcentage de graisse corporelle.";
+    } else {
+        return img < 25 ? "Trop maigre - assurez-vous de manger suffisamment et sainement." :
+               img <= 30 ? "Pourcentage de graisse corporelle normal - c'est un bon équilibre." :
+               "Trop de graisse - il serait bénéfique pour votre santé de réduire la graisse corporelle.";
+    }
+}
+
+function interpretRTH(rth, sex) {
+    return (sex === 'male' && rth > 1) || (sex === 'female' && rth > 0.85) ?
+           "Silhouette androïde (risque métabolique accru) - une concentration de graisse autour de l'abdomen." :
+           "Silhouette gynoïde (risque métabolique réduit) - une répartition plus équilibrée de la graisse corporelle.";
+}
+</script>
+
+</body>
+</html>
